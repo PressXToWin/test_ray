@@ -1,11 +1,11 @@
-from celery import shared_task
-import os
 import json
+import os
+from datetime import datetime, timedelta
 
-
+from celery import shared_task
 from dotenv import load_dotenv
 from requests import get
-from datetime import datetime, timedelta
+
 from posts.models import Post, User
 
 load_dotenv()

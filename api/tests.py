@@ -1,6 +1,7 @@
 from django.test import TestCase
-from posts.models import User, Post
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient, APITestCase
+
+from posts.models import Post, User
 
 
 class PostTest(APITestCase):

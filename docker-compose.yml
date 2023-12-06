@@ -1,0 +1,46 @@
+version: '3.3'
+
+volumes:
+  ray_pg_data:
+  ray_static:
+  foodgram_media:
+
+services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - ray_pg_data:/var/lib/postgresql/data
+    restart: on-failure
+    healthcheck:
+      test: pg_isready -U ray
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:6.2-alpine
+    restart: on-failure
+
+  backend:
+    build: ./
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ray_static:/static
+    depends_on:
+      db:
+          condition: service_healthy
+      redis:
+        condition: service_started
+
+  nginx:
+    image: nginx:1.19.3
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ray_static:/usr/share/nginx/html/
+    depends_on:
+      - backend
