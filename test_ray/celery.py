@@ -21,7 +21,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'add-posts-about-bitcoin': {
         'task': 'posts.tasks.get_news',
-        'schedule': crontab(minute=0, hour=0),
+        'schedule': crontab(minute='0', hour='0'),
         'args': ('bitcoin', )
     },
 }
