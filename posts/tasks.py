@@ -1,3 +1,4 @@
+from celery import shared_task
 import os
 import json
 
@@ -5,7 +6,6 @@ import json
 from dotenv import load_dotenv
 from requests import get
 from datetime import datetime, timedelta
-from django.core.management import BaseCommand
 from posts.models import Post, User
 
 load_dotenv()
@@ -17,18 +17,14 @@ yesterday = datetime.now() - timedelta(days=1)
 date = yesterday.strftime('%Y-%m-%d')
 
 
-class Command(BaseCommand):
-
-    def add_arguments(self, parser):
-        parser.add_argument('query')
-
-    def handle(self, *args, **options):
-        query = options['query']
-        url = f'https://newsapi.org/v2/everything?q={query}&from={date}&to={date}&sortBy=popularity&apiKey={API_KEY}&language=ru'
-        if not User.objects.filter(username=f'{query}_bot').exists():
-            User.objects.create(username=f'{query}_bot')
-        response = get(url).text
-        response = json.loads(response)
+@shared_task()
+def get_news(query):
+    url = f'https://newsapi.org/v2/everything?q={query}&from={date}&to={date}&sortBy=popularity&apiKey={API_KEY}&language=ru'
+    if not User.objects.filter(username=f'{query}_bot').exists():
+        User.objects.create(username=f'{query}_bot')
+    response = get(url).text
+    response = json.loads(response)
+    if response['totalResults'] != 0:
         articles = response['articles']
         result = []
         for article in articles:
